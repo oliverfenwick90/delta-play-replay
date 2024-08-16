@@ -5,6 +5,7 @@ mod path;
 mod references;
 pub mod selector;
 
+pub use anyhow;
 pub use document::*;
 pub use model::*;
 pub use path::*;

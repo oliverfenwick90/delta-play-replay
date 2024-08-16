@@ -1,9 +1,8 @@
-use crate::Ref;
+use crate::{Ref, Reference};
 use anyhow::Context;
-use bytes::Buf;
+pub use bytes::Buf;
 use std::any::Any;
 use std::fmt::Debug;
-pub use uncage_model_proc_macro::Model as ModelProc;
 
 pub trait ModelCollection: Debug {
     fn create_model(id: usize) -> Self;
@@ -272,6 +271,8 @@ pub trait Model: Debug + Default + ModelDescription + Any {
     fn model_name() -> &'static str;
 }
 
+pub use uncage_model_proc_macro::{Model, ModelCollection};
+
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -281,11 +282,11 @@ mod tests {
     use bytes::{Buf, Bytes};
     use std::any::Any;
     use std::collections::{BTreeMap, HashMap};
-    pub use uncage_model_proc_macro::Model as ModelProc;
+    use uncage_model_proc_macro::DeriveModel;
 
     #[test]
     pub fn test_works() {
-        #[derive(Debug, Default, ModelProc)]
+        #[derive(Debug, Default, DeriveModel)]
         #[uncage(type = 4)]
         struct Game {
             #[uncage(index = 0)]

@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
-use uncage_model::{Model, ModelBTreeMap, ModelCollection, ModelHashMap, ModelRef, ModelVec, Ref};
+use uncage_model::{
+    Model, ModelBTreeMap, ModelCollection, ModelHashMap, ModelRef, ModelVec, Ref, Reference,
+};
 
 #[derive(ModelCollection, Debug)]
 pub enum Models {
@@ -8,6 +10,9 @@ pub enum Models {
     ColorTable(ColorTable),
     MapTile(MapTile),
     TerrainType(TerrainType),
+    TerrainSpriteInfoList(TerrainSpriteInfoList),
+    TerrainSpriteInfo(TerrainSpriteInfo),
+    UnitGroup(UnitGroup),
     Player(Player),
     Relation(Relation),
     VictoryPointEntry(VictoryPointEntry),
@@ -20,11 +25,14 @@ pub enum Models {
     BuildingEntity(BuildingEntity),
     ProductionQueueRecord(ProductionQueueRecord),
     MasterEntity(MasterEntity),
+    MasterMovingEntity(MasterMovingEntity),
     MasterActionEntity(MasterActionEntity),
+    Task(Task),
     MasterCombatEntity(MasterCombatEntity),
     ArmorWeaponInfo(ArmorWeaponInfo),
     MasterMissileEntity(MasterMissileEntity),
     MasterBuildingEntity(MasterBuildingEntity),
+    DamageSpriteInfo(DamageSpriteInfo),
     Action(Action),
     MakeObjectAction(MakeObjectAction),
     MakeTechAction(MakeTechAction),
@@ -34,7 +42,7 @@ pub enum Models {
     WonderAction(WonderAction),
     PackAction(PackAction),
     UnpackAction(UnpackAction),
-    FarmAction(FarmAction),
+    MakeAction(MakeAction),
     ActiveSprite(ActiveSprite),
     Sprite(Sprite),
     DeltaSprite(DeltaSprite),
@@ -115,6 +123,12 @@ pub struct World {
     pub countdown_victory: bool,
     #[uncage(index = 26)]
     pub victory_type: i8,
+    #[uncage(index = 27)]
+    pub extra_terrain_info: ModelVec<TerrainSpriteInfoList>,
+    #[uncage(index = 28)]
+    pub unit_groups: ModelBTreeMap<i32, UnitGroup>,
+    #[uncage(index = 29)]
+    pub selected_game: i32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -176,6 +190,33 @@ pub struct TerrainType {
     pub map_tall_color: u8,
     #[uncage(index = 13)]
     pub map_short_color: u8,
+}
+
+#[derive(Model, Debug, Default)]
+#[uncage(type = 44)]
+pub struct TerrainSpriteInfoList {
+    #[uncage(index = 0)]
+    pub list: ModelVec<TerrainSpriteInfo>,
+}
+
+#[derive(Model, Debug, Default)]
+#[uncage(type = 45)]
+pub struct TerrainSpriteInfo {
+    #[uncage(index = 0)]
+    pub exit_tile_sprite_id: i32,
+    #[uncage(index = 1)]
+    pub enter_tile_sprite_id: i32,
+    #[uncage(index = 2)]
+    pub walk_tile_sprite_id: i32,
+    #[uncage(index = 3)]
+    pub walk_sprite_rate: i32,
+}
+
+#[derive(Model, Debug, Default)]
+#[uncage(type = 46)]
+pub struct UnitGroup {
+    #[uncage(index = 0)]
+    pub current_command: i32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -666,6 +707,92 @@ pub struct PlayerAttributes {
     pub elevation_lower_bonus: f32,
     #[uncage(index = 192)]
     pub trigger_shared_los: f32,
+    #[uncage(index = 193)]
+    pub livestock_bonus: f32,
+    #[uncage(index = 194)]
+    pub cuman_town_center_limit: f32,
+    #[uncage(index = 195)]
+    pub fish_bonus: f32,
+    #[uncage(index = 196)]
+    pub relic_food: f32,
+    #[uncage(index = 197)]
+    pub villagers_killed_by_gaia: f32,
+    #[uncage(index = 198)]
+    pub villagers_killed_by_animals: f32,
+    #[uncage(index = 199)]
+    pub villagers_killed_by_ai_player: f32,
+    #[uncage(index = 200)]
+    pub villagers_killed_by_human_player: f32,
+    #[uncage(index = 201)]
+    pub food_generation: f32,
+    #[uncage(index = 202)]
+    pub wood_generation: f32,
+    #[uncage(index = 203)]
+    pub stone_generation: f32,
+    #[uncage(index = 204)]
+    pub gold_generation: f32,
+    #[uncage(index = 205)]
+    pub spawn_cap: f32,
+    #[uncage(index = 206)]
+    pub flemish_militia_pop: f32,
+    #[uncage(index = 207)]
+    pub folwark_collect_amount: f32,
+    #[uncage(index = 208)]
+    pub folwark_collect_attribute_type: f32,
+    #[uncage(index = 209)]
+    pub folwark_building_id: f32,
+    #[uncage(index = 210)]
+    pub units_converted: f32,
+    #[uncage(index = 211)]
+    pub stone_mining_gold_productivity: f32,
+    #[uncage(index = 212)]
+    pub workshop_food_generation: f32,
+    #[uncage(index = 213)]
+    pub workshop_wood_generation: f32,
+    #[uncage(index = 214)]
+    pub workshop_stone_generation: f32,
+    #[uncage(index = 215)]
+    pub workshop_gold_generation: f32,
+    #[uncage(index = 216)]
+    pub build_value_total_units: f32,
+    #[uncage(index = 217)]
+    pub build_value_total_buildings: f32,
+    #[uncage(index = 218)]
+    pub villagers_created_total: f32,
+    #[uncage(index = 219)]
+    pub villager_idle_periods_total: f32,
+    #[uncage(index = 220)]
+    pub villager_idle_seconds_total: f32,
+    #[uncage(index = 221)]
+    pub trade_food_percent: f32,
+    #[uncage(index = 222)]
+    pub trade_wood_percent: f32,
+    #[uncage(index = 223)]
+    pub trade_stone_percent: f32,
+    #[uncage(index = 224)]
+    pub livestock_food: f32,
+    #[uncage(index = 225)]
+    pub speedup_building_type: f32,
+    #[uncage(index = 226)]
+    pub speedup_building_range: f32,
+    #[uncage(index = 227)]
+    pub speedup_percentage: f32,
+    #[uncage(index = 228)]
+    pub speedup_object_type: f32,
+    #[uncage(index = 229)]
+    pub speedup_effect_type: f32,
+    #[uncage(index = 230)]
+    pub speedup_secondary_effect_type: f32,
+    #[uncage(index = 231)]
+    pub speedup_secondary_percentage: f32,
+    #[uncage(index = 232)]
+    pub extra_elephant_conv_resist: f32,
+    #[uncage(index = 233)]
+    pub scout_id: f32,
+    #[uncage(index = 234)]
+    pub relic_wood: f32,
+    #[uncage(index = 235)]
+    pub relic_stone: f32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -745,6 +872,8 @@ pub struct ActionEntity {
     pub formation_type: u8,
     #[uncage(index = 36)]
     pub attack_stance: u8,
+    #[uncage(index = 52)]
+    pub speedup_value: f32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -764,6 +893,20 @@ pub struct CombatEntity {
     pub current_volley_fire_amount: f32,
     #[uncage(index = 44)]
     pub charge: f32,
+    #[uncage(index = 45)]
+    pub melee_armor_removed: i16,
+    #[uncage(index = 46)]
+    pub pierce_armor_removed: i16,
+    #[uncage(index = 47)]
+    pub attack_power_up: f32,
+    #[uncage(index = 48)]
+    pub speed_power_up: f32,
+    #[uncage(index = 49)]
+    pub reload_power_up: f32,
+    #[uncage(index = 50)]
+    pub work_rate_power_up: f32,
+    #[uncage(index = 51)]
+    pub regeneration_rate_power_up: f32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -862,6 +1005,8 @@ pub struct MasterEntity {
     pub fog_flag: u8,
     #[uncage(index = 17)]
     pub attribute_max_amount: i16,
+    #[uncage(index = 80)]
+    pub combat_level: u8,
     #[uncage(index = 18)]
     pub map_draw_level: u8,
     #[uncage(index = 19)]
@@ -890,13 +1035,40 @@ pub struct MasterEntity {
     pub selected_sound_event: ModelRef<SoundEvent>,
     #[uncage(index = 45)]
     pub damage_sound_event: ModelRef<SoundEvent>,
+    #[uncage(index = 64)]
+    pub terrain_restriction_mask_id: i16,
+    #[uncage(index = 65)]
+    pub movement_type: u8,
+    #[uncage(index = 69)]
+    pub damage_sprites: ModelVec<DamageSpriteInfo>,
+    #[uncage(index = 73)]
+    pub sprite_id: i16,
+    #[uncage(index = 74)]
+    pub death_sprite_id: i16,
+}
+
+#[derive(Model, Debug, Default)]
+#[uncage(type = 47)]
+pub struct MasterMovingEntity {
+    #[uncage(extends)]
+    pub parent: MasterEntity,
+    #[uncage(index = 81)]
+    pub move_sprite: i16,
+    #[uncage(index = 82)]
+    pub run_sprite: i16,
+    #[uncage(index = 70)]
+    pub obj_trail_id: i16,
+    #[uncage(index = 71)]
+    pub obj_trail_options: u8,
+    #[uncage(index = 72)]
+    pub obj_trail_spacing: f32,
 }
 
 #[derive(Model, Debug, Default)]
 #[uncage(type = 17)]
 pub struct MasterActionEntity {
     #[uncage(extends)]
-    pub parent: MasterEntity,
+    pub parent: MasterMovingEntity,
     #[uncage(index = 28)]
     pub work_rate: f32,
     #[uncage(index = 46)]
@@ -905,6 +1077,71 @@ pub struct MasterActionEntity {
     pub move_sound_event: ModelRef<SoundEvent>,
     #[uncage(index = 53)]
     pub speed: f32,
+    #[uncage(index = 83)]
+    pub tasks: ModelVec<Task>,
+}
+
+#[derive(Model, Debug, Default)]
+#[uncage(type = 49)]
+pub struct Task {
+    #[uncage(index = 0)]
+    pub task_type: i16,
+    #[uncage(index = 1)]
+    pub id: i16,
+    #[uncage(index = 2)]
+    pub is_default: u8,
+    #[uncage(index = 3)]
+    pub action_type: i16,
+    #[uncage(index = 4)]
+    pub object_group: i16,
+    #[uncage(index = 5)]
+    pub object_id: i16,
+    #[uncage(index = 6)]
+    pub combat_level: u8,
+    #[uncage(index = 7)]
+    pub combat_level_flag: u8,
+    #[uncage(index = 8)]
+    pub terrain_id: i16,
+    #[uncage(index = 9)]
+    pub owner_type: u8,
+    #[uncage(index = 10)]
+    pub holding_attr: u8,
+    #[uncage(index = 11)]
+    pub state_building: u8,
+    #[uncage(index = 12)]
+    pub attribute_type: i16,
+    #[uncage(index = 13)]
+    pub attribute_type2: i16,
+    #[uncage(index = 14)]
+    pub attribute_type3: i16,
+    #[uncage(index = 15)]
+    pub attribute_type4: i16,
+    #[uncage(index = 16)]
+    pub work_val1: f32,
+    #[uncage(index = 17)]
+    pub work_val2: f32,
+    #[uncage(index = 18)]
+    pub work_range: f32,
+    #[uncage(index = 19)]
+    pub search_flag: u8,
+    #[uncage(index = 20)]
+    pub search_wait_time: f32,
+    #[uncage(index = 21)]
+    pub work_flag: i16,
+    #[uncage(index = 22)]
+    pub work_flag2: i16,
+    #[uncage(index = 23)]
+    pub move_sprite: i16,
+    #[uncage(index = 24)]
+    pub work_sprite: i16,
+    #[uncage(index = 25)]
+    pub work_sprite2: i16,
+    #[uncage(index = 26)]
+    pub carry_sprite: i16,
+    #[uncage(index = 27)]
+    pub gather_sound_event: ModelRef<SoundEvent>,
+    #[uncage(index = 28)]
+    pub deposit_sound_event: ModelRef<SoundEvent>,
 }
 
 #[derive(Model, Debug, Default)]
@@ -956,6 +1193,38 @@ pub struct MasterCombatEntity {
     pub max_charge: f32,
     #[uncage(index = 63)]
     pub recharge_rate: f32,
+    #[uncage(index = 84)]
+    pub area_damage: f32,
+    #[uncage(index = 85)]
+    pub combat_ability: u8,
+    #[uncage(index = 86)]
+    pub regeneration_rate: f32,
+    #[uncage(index = 87)]
+    pub spacing_modifier: f32,
+    #[uncage(index = 88)]
+    pub formation_category: u8,
+    #[uncage(index = 89)]
+    pub charge_event: i16,
+    #[uncage(index = 90)]
+    pub charge_type: i16,
+    #[uncage(index = 66)]
+    pub fight_sprite: i16,
+    #[uncage(index = 67)]
+    pub missile_id: i32,
+    #[uncage(index = 68)]
+    pub volley_missile_id: i32,
+    #[uncage(index = 75)]
+    pub spawning_sprite_id: i16,
+    #[uncage(index = 76)]
+    pub upgrade_sprite_id: i16,
+    #[uncage(index = 77)]
+    pub hero_glow_sprite_id: i16,
+    #[uncage(index = 91)]
+    pub min_conversion_time_adj: f32,
+    #[uncage(index = 92)]
+    pub max_conversion_time_adj: f32,
+    #[uncage(index = 93)]
+    pub conversion_chance_adj: f32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -991,6 +1260,21 @@ pub struct MasterBuildingEntity {
     pub on_build_make_tile: i16,
     #[uncage(index = 52)]
     pub on_build_make_overlay: i16,
+    #[uncage(index = 78)]
+    pub researching_sprite_id: i16,
+    #[uncage(index = 79)]
+    pub research_completed_sprite_id: i16,
+}
+
+#[derive(Model, Debug, Default)]
+#[uncage(type = 48)]
+pub struct DamageSpriteInfo {
+    #[uncage(index = 0)]
+    pub sprite_id: i16,
+    #[uncage(index = 1)]
+    pub damage_percent: u8,
+    #[uncage(index = 2)]
+    pub flag: u8,
 }
 
 #[derive(Model, Debug, Default)]
@@ -1098,7 +1382,7 @@ pub struct UnpackAction {
 
 #[derive(Model, Debug, Default)]
 #[uncage(type = 43)]
-pub struct FarmAction {
+pub struct MakeAction {
     #[uncage(extends)]
     pub parent: Action,
 }
@@ -1151,6 +1435,10 @@ pub struct Sprite {
     pub sound_list: ModelVec<SoundList>,
     #[uncage(index = 14)]
     pub particle_effect_name: String,
+    #[uncage(index = 15)]
+    pub duration: f32,
+    #[uncage(index = 16)]
+    pub base_speed: f32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -1176,9 +1464,9 @@ pub struct Technology {
     #[uncage(index = 1)]
     pub build_obj_id: i16,
     #[uncage(index = 2)]
-    pub string_id: i16,
+    pub remove_string_id: i16,
     #[uncage(index = 3)]
-    pub string_id_2: i16,
+    pub remove_string_id_2: i16,
     #[uncage(index = 4)]
     pub icon: i16,
     #[uncage(index = 5)]
@@ -1193,6 +1481,10 @@ pub struct Technology {
     pub civ_prerequisite_ignore_full_tech_flag: i16,
     #[uncage(index = 10)]
     pub cost: ModelVec<AttributeValue>,
+    #[uncage(index = 11)]
+    pub string_id: i32,
+    #[uncage(index = 12)]
+    pub string_id_2: i32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -1335,6 +1627,14 @@ pub struct GameOptions {
     pub custom_random_map_file: String,
     #[uncage(index = 45)]
     pub custom_random_map_scenario_file: String,
+    #[uncage(index = 48)]
+    pub game_speed: f32,
+    #[uncage(index = 49)]
+    pub sub_game_mode_flag: i32,
+    #[uncage(index = 50)]
+    pub walkable_farms: bool,
+    #[uncage(index = 51)]
+    pub selected_game: i32,
 }
 
 #[derive(Model, Debug, Default)]
@@ -1376,6 +1676,10 @@ pub struct PlayerGameOptions {
     pub civilization_choice_specific_id: i16,
     #[uncage(index = 17)]
     pub dat_file_crc: u32,
+    #[uncage(index = 18)]
+    pub handicap: i32,
+    #[uncage(index = 19)]
+    pub profile_id: i64,
 }
 
 #[derive(Model, Debug, Default)]
@@ -1472,7 +1776,7 @@ pub struct ParticleInstance {
     #[uncage(index = 31)]
     pub sprite_loop_offset: f32,
     #[uncage(index = 32)]
-    pub sprite_animation_type: f32,
+    pub sprite_animation_type: u8,
     #[uncage(index = 33)]
     pub sprite_duration: f32,
     #[uncage(index = 34)]
