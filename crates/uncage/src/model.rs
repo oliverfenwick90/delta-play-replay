@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
-use uncage_model::{Model, ModelBTreeMap, ModelCollection, ModelHashMap, ModelRef, ModelVec, Ref};
+use uncage_model::{
+    Model, ModelBTreeMap, ModelCollection, ModelHashMap, ModelRef, ModelVec, Ref, Reference,
+};
 
 #[derive(ModelCollection, Debug)]
 pub enum Models {

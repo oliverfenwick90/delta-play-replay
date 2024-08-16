@@ -1,0 +1,16 @@
+[package]
+name = "uncage-protos"
+version = "0.1.0"
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+bytes = { workspace = true }
+prost = "0.12"
+tonic = { version = "0.11", features = ["tls"] }
+
+[build-dependencies]
+tonic-build = "0.12.1"
+prost-build = "0.13.1"

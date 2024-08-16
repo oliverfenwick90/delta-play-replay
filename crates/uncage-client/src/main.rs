@@ -1,5 +1,3 @@
-use crate::pb::cade_remote_client::CadeRemoteClient;
-use crate::pb::FramesRequest;
 use hyper::client::HttpConnector;
 use hyper::{Client, Uri};
 use hyper_openssl::HttpsConnector;
@@ -7,13 +5,11 @@ use openssl::pkey::PKey;
 use openssl::ssl::{SslConnector, SslMethod};
 use openssl::x509::X509;
 use std::fs::File;
+use uncage_protos::pb::cade_remote_client::CadeRemoteClient;
+use uncage_protos::pb::FramesRequest;
 
 pub use prost::{self, Message};
 use std::io::Write;
-
-pub mod pb {
-    tonic::include_proto!("cade_api.rpc");
-}
 
 pub const ALPN_H2_WIRE: &[u8] = b"\x02h2";
 
@@ -72,33 +68,38 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut client = CadeRemoteClient::new(add_origin);
 
+    // 755,348,328
+    // 524,288,000
+    //   5,997,891
+    client = client.max_decoding_message_size(1024 * 1024 * 1000); // Set to 50MB
+
     let request = tonic::Request::new(FramesRequest {
         desired_resolutions: vec![],
         ..Default::default()
     });
 
     let mut response: tonic::Response<tonic::Streaming<_>> = client.frames(request).await?;
+
     let mut frames = 0;
     let mut events = 0;
     let mut commands = 0;
     let mut sequences = 0;
 
-    let output = File::open("output.xz")?;
+    let mut output = File::create("output.bin")?;
 
-    let mut compressor = xz2::write::XzEncoder::new(output, 9);
+    // let mut compressor = xz2::write::XzEncoder::new(output, 9);
 
+    let mut max_encoded_msg_len = 0;
     let mut bytes = Vec::with_capacity(10 * 1024 * 1024);
     while let Some(seq) = response.get_mut().message().await? {
         bytes.clear();
         frames += seq.frame.len();
-
         for frame in &seq.frame {
             events += frame.event.len();
             commands += frame.command.len();
         }
-
         Message::encode_length_delimited(&seq, &mut bytes)?;
-        compressor
+        output
             .write_all(&bytes)
             .expect("Failed to write to compressor");
         sequences += 1usize;
